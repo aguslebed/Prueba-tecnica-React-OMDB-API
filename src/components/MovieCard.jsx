@@ -5,10 +5,11 @@ export function MovieCard({ movie }) {
         transition-transform duration-300 cursor-pointer
         border border-gray-300 rounded-lg p-2
         shadow-lg
+        h-full
         ' >
-            <img src={movie.poster} alt={movie.title} className='w-48 h-64 rounded-lg' />
-            <h2>{movie.title}</h2>
-            <p>{movie.year}</p>
+            <img src={movie.poster} alt={movie.title} className='w-72 h-96 rounded-lg' />
+            <h2 className='text-lg flex justify-center font-bold w-48'>{movie.title}</h2>
+            <p className='flex justify-center w-48'>{movie.year}</p>
         </div>
     )
 }

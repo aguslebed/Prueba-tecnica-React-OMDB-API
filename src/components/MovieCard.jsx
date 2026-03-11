@@ -3,7 +3,7 @@ export function MovieCard({ movie }) {
     return (
         <div key={movie.imdbID} className='flex flex-col items-center hover:scale-105 
         transition-transform duration-300 cursor-pointer
-        border border-gray-300 rounded-lg p-2
+        bg-slate-800 border border-slate-700 rounded-lg p-2
         shadow-lg
         h-full
         ' >

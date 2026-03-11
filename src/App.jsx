@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import moviesResponse from './mocks/moviesResponse.json'
 import { MovieCard } from './components/MovieCard'
@@ -7,23 +7,28 @@ import { getMovies } from './api'
 function App() {
   const [count, setCount] = useState(0)
   const [hasMovies, setHasMovies] = useState(moviesResponse.Search.length > 0)
+  const [searchInput, setSearchInput] = useState('')
 
-  //Mapeo de la respuesta de la API a un objeto mas limpio
-  const [movies, setMovies] = useState(moviesResponse.Search.map((movie) => {
-    return {
-      title: movie.Title,
-      year: movie.Year,
-      poster: movie.Poster,
-      imdbID: movie.imdbID
-    }
-  }))
+  const [movies, setMovies] = useState([])
 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const fields = new window.FormData(e.target)
     const movieSearchInput = fields.get('movieSearchInput')
-    const response = await getMovies(movieSearchInput)
+    searchMovie(movieSearchInput)
+  }
+
+  async function searchMovie(movieName = 'Avengers') {
+    setSearchInput(movieName)
+    const response = await getMovies(movieName)
+
+    if (response.Response === 'True') {
+      setHasMovies(true)
+    } else {
+      setHasMovies(false)
+    }
+
     setMovies(response.Search.map((movie) => {
       return {
         title: movie.Title,
@@ -33,6 +38,11 @@ function App() {
       }
     }))
   }
+
+  useEffect(() => {
+    searchMovie()
+  }, [])
+
 
   return (
     <div className='min-h-screen bg-slate-900 text-slate-100'>
@@ -59,10 +69,13 @@ function App() {
         </div>
       </header>
 
-      <main className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 place-items-center mt-6'>
-        {hasMovies ? movies.map((movie) => (
-          <MovieCard key={movie.imdbID} movie={movie} />
-        )) : <p>No se encontraron películas</p>}
+      <main >
+        <h2 className='text-2xl font-bold text-indigo-400 text-center'>Busqueda: {searchInput}</h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 place-items-center mt-6'>
+          {hasMovies ? movies.map((movie) => (
+            <MovieCard key={movie.imdbID} movie={movie} />
+          )) : <p>No se encontraron películas</p>}
+        </div>
       </main>
     </div>
   )

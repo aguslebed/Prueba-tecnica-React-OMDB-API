@@ -1,47 +1,68 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import moviesResponse from './mocks/moviesResponse.json'
 import { MovieCard } from './components/MovieCard'
 import { getMovies } from './api'
 
-function App() {
-  const [count, setCount] = useState(0)
+
+export function useSearch() {
   const [hasMovies, setHasMovies] = useState(moviesResponse.Search.length > 0)
-  const [searchInput, setSearchInput] = useState('')
+  const [searchInput, setSearchInput] = useState('Avengers')
 
   const [movies, setMovies] = useState([])
+  const moviesRef = useRef('')
 
+  async function searchMovie() {
+    const response = await getMovies(searchInput)
+
+    if (response.Response === 'True') {
+      setHasMovies(true)
+      setMovies(response.Search.map((movie) => {
+        const obj = {
+          title: movie.Title,
+          year: movie.Year,
+          poster: movie.Poster,
+          imdbID: movie.imdbID
+        }
+        moviesRef.current = obj
+        return obj
+      }))
+    } else {
+      setHasMovies(false)
+    }
+  }
+
+  function changeInput(input) {
+    setSearchInput(input)
+  }
+
+  useEffect(() => {
+    //Evitar que se renderice dos veces
+    if (moviesRef.current !== searchInput) {
+      searchMovie()
+    }
+  }, [searchInput])
+
+  return {
+    hasMovies,
+    searchInput,
+    movies,
+    searchMovie,
+    changeInput
+  }
+}
+
+function App() {
+  const [input, setInput] = useState('')
+
+  const { hasMovies, searchInput, movies, changeInput } = useSearch()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const fields = new window.FormData(e.target)
     const movieSearchInput = fields.get('movieSearchInput')
-    searchMovie(movieSearchInput)
+    changeInput(movieSearchInput)
   }
-
-  async function searchMovie(movieName = 'Avengers') {
-    setSearchInput(movieName)
-    const response = await getMovies(movieName)
-
-    if (response.Response === 'True') {
-      setHasMovies(true)
-    } else {
-      setHasMovies(false)
-    }
-
-    setMovies(response.Search.map((movie) => {
-      return {
-        title: movie.Title,
-        year: movie.Year,
-        poster: movie.Poster,
-        imdbID: movie.imdbID
-      }
-    }))
-  }
-
-  useEffect(() => {
-    searchMovie()
-  }, [])
 
 
   return (
